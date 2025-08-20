@@ -1,0 +1,29 @@
+# Pastas de build e IDE
+bin
+obj
+.vs
+.vscode
+**/*.user
+**/*.suo
+
+# Git e configs locais
+.git
+.gitignore
+.dockerignore
+
+# Logs e temporários
+*.log
+
+# Node (se existir)
+node_modules
+
+# Arquivos de projeto que não precisam ir
+*.dbmdl
+*.jfm
+*.psess
+*.vsp
+*.vspx
+
+# Docker e compose alternativos
+Dockerfile.*
+docker-compose.*
