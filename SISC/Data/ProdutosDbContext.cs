@@ -3,9 +3,9 @@ using SISC.Models.Produto;
 
 namespace SISC.Data
 {
-    public class ProdutoDbContext : DbContext
+    public class ProdutosDbContext : DbContext
     {
-        public ProdutoDbContext(DbContextOptions<ProdutoDbContext> options) : base(options) { }
+        public ProdutosDbContext(DbContextOptions<ProdutosDbContext> options) : base(options) { }
 
         public DbSet<Produto> Produtos { get; set; }
 

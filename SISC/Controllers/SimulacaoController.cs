@@ -11,9 +11,9 @@ namespace SISC.Controllers
     [Route("api/v1/[controller]")]
     public class SimulacaoController : ControllerBase
     {
-        private readonly ProdutoDbContext _produtoDb;
+        private readonly ProdutosDbContext _produtoDb;
 
-        public SimulacaoController(ProdutoDbContext produtoDb)
+        public SimulacaoController(ProdutosDbContext produtoDb)
         {
             _produtoDb = produtoDb;
         }

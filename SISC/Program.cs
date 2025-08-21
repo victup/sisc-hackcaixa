@@ -8,7 +8,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // --- ProdutosDb (SQL Server local / já existente, sem migrations automáticas) ---
-builder.Services.AddDbContext<ProdutoDbContext>(options =>
+builder.Services.AddDbContext<ProdutosDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("ProdutosDb"),
         sql => sql.EnableRetryOnFailure()

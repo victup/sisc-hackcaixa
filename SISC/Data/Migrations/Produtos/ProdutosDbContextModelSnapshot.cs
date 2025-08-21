@@ -9,8 +9,8 @@ using SISC.Data;
 
 namespace SISC.Data.Migrations.Produtos
 {
-    [DbContext(typeof(ProdutoDbContext))]
-    partial class ProdutoDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ProdutosDbContext))]
+    partial class ProdutosDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

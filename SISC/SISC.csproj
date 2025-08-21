@@ -23,8 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Data\Migrations\Produtos\" />
+    <Folder Include="Data\Migrations\Simulacoes\" />
     <Folder Include="Filters\" />
-    <Folder Include="Migrations\" />
     <Folder Include="Repositories\" />
     <Folder Include="Services\" />
   </ItemGroup>

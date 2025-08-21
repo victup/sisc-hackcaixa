@@ -10,7 +10,7 @@ using SISC.Data;
 namespace SISC.Data.Migrations.Simulacoes
 {
     [DbContext(typeof(SimulacoesDbContext))]
-    [Migration("20250821144239_InitialCreateSimulacoes")]
+    [Migration("20250821230426_InitialCreateSimulacoes")]
     partial class InitialCreateSimulacoes
     {
         /// <inheritdoc />

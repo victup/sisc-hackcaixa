@@ -34,7 +34,7 @@ VOLUME /app/data
 
 # cria a pasta /app/data para armazenar o SQLite
 USER root
-RUN mkdir -p /app/data && chmod 777 /app/data
+RUN mkdir -p /app/data && chown appuser:appgroup /app/data
 USER appuser
 
 ENTRYPOINT ["dotnet", "SISC.dll"]
