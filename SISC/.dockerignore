@@ -1,6 +1,7 @@
 # Pastas de build e IDE
 bin
 obj
+*.db
 .vs
 .vscode
 **/*.user
