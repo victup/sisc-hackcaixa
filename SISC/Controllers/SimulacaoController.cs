@@ -4,6 +4,7 @@ using SISC.Data;
 using SISC.DTOs.Requests.Simulacao;
 using SISC.DTOs.Responses.Simulacao;
 using SISC.Models.Produto;
+using SISC.Services.Produtos;
 
 namespace SISC.Controllers
 {
@@ -11,18 +12,18 @@ namespace SISC.Controllers
     [Route("api/v1/[controller]")]
     public class SimulacaoController : ControllerBase
     {
-        private readonly ProdutosDbContext _produtoDb;
+        private readonly IProdutoService _produtoService;
 
-        public SimulacaoController(ProdutosDbContext produtoDb)
+        public SimulacaoController(IProdutoService produtoService)
         {
-            _produtoDb = produtoDb;
+            _produtoService = produtoService;
         }
 
         [HttpGet("produtos")]
         [ProducesResponseType(typeof(IEnumerable<Produto>), 200)]
         public async Task<IActionResult> GetProdutos()
         {
-            var produtos = await _produtoDb.Produtos.ToListAsync();
+            var produtos = await _produtoService.ListarProdutosAsync();
             return Ok(produtos);
         }
 
