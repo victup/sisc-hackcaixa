@@ -2,6 +2,7 @@
 using SISC.DTOs.Requests.Simulacao;
 using SISC.DTOs.Responses.Simulacao;
 using SISC.Services.Simulacao;
+using SISC.Services.Telemetria;
 
 namespace SISC.Controllers
 {
@@ -10,10 +11,12 @@ namespace SISC.Controllers
     public class SimulacaoController : ControllerBase
     {
         private readonly ISimulacaoService _service;
+        private readonly ITelemetriaService _telemetria;
 
-        public SimulacaoController(ISimulacaoService service)
+        public SimulacaoController(ISimulacaoService service, ITelemetriaService telemetria)
         {
             _service = service;
+            _telemetria = telemetria;
         }
 
         [HttpPost("simular")]
@@ -24,8 +27,24 @@ namespace SISC.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var simulacao = await _service.CriarSimulacaoAsync(request);
-            return Ok(simulacao);
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            try
+            {
+                var simulacao = await _service.CriarSimulacaoAsync(request);
+
+                stopwatch.Stop();
+                _telemetria.Registrar("Simulacao.Criar", stopwatch.ElapsedMilliseconds, true);
+
+                return Ok(simulacao);
+            }
+            catch
+            {
+                stopwatch.Stop();
+                _telemetria.Registrar("Simulacao.Criar", stopwatch.ElapsedMilliseconds, false);
+
+                throw;
+            }
         }
 
         [HttpGet]

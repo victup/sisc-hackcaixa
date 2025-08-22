@@ -2,6 +2,7 @@
 using SISC.Repositories.Simulacao;
 using SISC.Services.Produtos;
 using SISC.Services.Simulacao;
+using SISC.Services.Telemetria;
 
 namespace SISC.Extensions
 {
@@ -16,6 +17,8 @@ namespace SISC.Extensions
             // Services
             services.AddScoped<IProdutoService, ProdutoService>();
             services.AddScoped<ISimulacaoService, SimulacaoService>();
+
+            services.AddSingleton<ITelemetriaService, TelemetriaService>();
 
             return services;
         }
