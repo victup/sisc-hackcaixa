@@ -1,62 +1,48 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SISC.Data;
 using SISC.DTOs.Requests.Simulacao;
 using SISC.DTOs.Responses.Simulacao;
-using SISC.Models.Produto;
-using SISC.Services.Produtos;
+using SISC.Services.Simulacao;
 
 namespace SISC.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/simulacoes")]
     public class SimulacaoController : ControllerBase
     {
-        private readonly IProdutoService _produtoService;
+        private readonly ISimulacaoService _service;
 
-        public SimulacaoController(IProdutoService produtoService)
+        public SimulacaoController(ISimulacaoService service)
         {
-            _produtoService = produtoService;
+            _service = service;
         }
 
-        [HttpGet("produtos")]
-        [ProducesResponseType(typeof(IEnumerable<Produto>), 200)]
-        public async Task<IActionResult> GetProdutos()
+        [HttpPost("simular")]
+        [ProducesResponseType(typeof(SimulacaoResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<SimulacaoResponse>> Criar([FromBody] SimulacaoRequest request)
         {
-            var produtos = await _produtoService.ListarProdutosAsync();
-            return Ok(produtos);
-        }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-        [HttpPost("criar")]
-        [ProducesResponseType(typeof(SimulacaoResponse), 200)]
-        [ProducesResponseType(400)]
-        public IActionResult CriarSimulacao([FromBody] SimulacaoRequest request)
-        {
-            if (request == null || request.ValorDesejado <= 0)
-                return BadRequest("Requisição inválida");
-
-            var simulacao = new SimulacaoResponse
-            {
-                IdSimulacao = DateTime.UtcNow.Ticks,
-                CodigoProduto = request.CodigoProduto,
-                DescricaoProduto = "Produto Teste",
-                ValorDesejado = request.ValorDesejado,
-                Prazo = request.Prazo,
-                TaxaJuros = 10.5m,
-                Tipo = "Exemplo",
-                Parcelas = new List<ParcelaResponse>
-                {
-                    new ParcelaResponse
-                    {
-                        Numero = 1,
-                        ValorAmortizacao = 100,
-                        ValorJuros = 10,
-                        ValorPrestacao = 110
-                    }
-                }
-            };
-
+            var simulacao = await _service.CriarSimulacaoAsync(request);
             return Ok(simulacao);
         }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<SimulacaoResponse>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<SimulacaoResponse>>> Todas()
+        {
+            var sims = await _service.ObterTodasAsync();
+            return Ok(sims);
+        }
+
+        [HttpGet("por-data/{data:datetime}")]
+        [ProducesResponseType(typeof(IEnumerable<SimulacaoResponse>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<SimulacaoResponse>>> PorData(DateTime data)
+        {
+            var sims = await _service.ObterPorDataAsync(data);
+            return Ok(sims);
+        }
+
     }
 }

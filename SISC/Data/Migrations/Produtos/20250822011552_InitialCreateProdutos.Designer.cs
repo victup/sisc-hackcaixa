@@ -11,7 +11,7 @@ using SISC.Data;
 namespace SISC.Data.Migrations.Produtos
 {
     [DbContext(typeof(ProdutosDbContext))]
-    [Migration("20250821230402_InitialCreateProdutos")]
+    [Migration("20250822011552_InitialCreateProdutos")]
     partial class InitialCreateProdutos
     {
         /// <inheritdoc />
