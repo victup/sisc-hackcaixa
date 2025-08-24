@@ -165,8 +165,6 @@ namespace SISC.Services.Simulacao
             return new ResultadoSimulacaoResumidoResponse
             {
                 IdSimulacao = s.Id,
-                CodigoProduto = s.CodigoProduto,
-                DescricaoProduto = s.DescricaoProduto,
                 valorDesejado = s.ValorDesejado,
                 Prazo = s.Prazo,
                 valorTotalParcelas = s.Resultados
