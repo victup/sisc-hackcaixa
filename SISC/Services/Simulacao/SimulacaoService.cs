@@ -81,11 +81,41 @@ namespace SISC.Services.Simulacao
             };
         }
 
-        public async Task<IEnumerable<SimulacaoCreateResponse>> ObterPorDataAsync(DateTime data)
+        public async Task<SimulacaoByDiaResponse> ObterPorDataAsync(DateTime data)
         {
             var sims = await _simulacaoRepo.GetByDateAsync(data);
-            return sims.Select(MapToResponseCreate);
+
+            var agrupado = sims
+                .GroupBy(s => new { s.CodigoProduto, s.DescricaoProduto })
+                .Select(g => new ResultadoSimulacaoByDiaResponse
+                {
+                    codigoProduto = g.Key.CodigoProduto,
+                    descricaoProduto = g.Key.DescricaoProduto,
+                    taxaMediaJuro = g.Average(x => x.TaxaJuros),
+
+                    valorMedioPrestacao = g.Average(x =>
+                        x.Resultados
+                            .SelectMany(r => r.Parcelas)
+                            .Average(p => p.ValorPrestacao)
+                    ),
+
+                    valorTotalDesejado = g.Sum(x => x.ValorDesejado),
+
+                    valorTotalCredito = g.Sum(x =>
+                        x.Resultados
+                         .SelectMany(r => r.Parcelas)
+                         .Sum(p => p.ValorPrestacao)
+                    )
+                })
+                .ToList();
+
+            return new SimulacaoByDiaResponse
+            {
+                DataReferencia = data.Date,
+                Simulacoes = agrupado
+            };
         }
+
 
         // --- MÉTODOS DE CÁLCULO ---
 
@@ -146,10 +176,10 @@ namespace SISC.Services.Simulacao
                 CodigoProduto = s.CodigoProduto,
                 DescricaoProduto = s.DescricaoProduto,
                 TaxaJuros = s.TaxaJuros,
-                ResultadoSimulacao = s.Resultados.Select(r => new ResultadoSimulacaoResponse
+                ResultadoSimulacao = s.Resultados.Select(r => new ResultadoSimulacaoCreateResponse
                 {
                     Tipo = r.Tipo,
-                    Parcelas = r.Parcelas.Select(p => new ParcelaResponse
+                    Parcelas = r.Parcelas.Select(p => new ParcelaCreateResponse
                     {
                         Numero = p.Numero,
                         ValorAmortizacao = p.ValorAmortizacao,
@@ -160,9 +190,9 @@ namespace SISC.Services.Simulacao
             };
         }
 
-        private ResultadoSimulacaoResumidoResponse MapToResultadoResumido(SISC.Models.Simulacao.Simulacao s)
+        private ResultadoSimulacaoGetAllResponse MapToResultadoResumido(SISC.Models.Simulacao.Simulacao s)
         {
-            return new ResultadoSimulacaoResumidoResponse
+            return new ResultadoSimulacaoGetAllResponse
             {
                 IdSimulacao = s.Id,
                 valorDesejado = s.ValorDesejado,

@@ -8,6 +8,6 @@ namespace SISC.DTOs.Responses.Simulacao
         public int CodigoProduto { get; set; }
         public string DescricaoProduto { get; set; } = string.Empty;
         public decimal TaxaJuros { get; set; }
-        public IEnumerable<ResultadoSimulacaoResponse> ResultadoSimulacao { get; set; } = new List<ResultadoSimulacaoResponse>();
+        public IEnumerable<ResultadoSimulacaoCreateResponse> ResultadoSimulacao { get; set; } = new List<ResultadoSimulacaoCreateResponse>();
     }
 }

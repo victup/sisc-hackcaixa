@@ -8,6 +8,6 @@ namespace SISC.Services.Simulacao
     {
         Task<SimulacaoCreateResponse> CriarSimulacaoAsync(SimulacaoRequest request);
         Task<SimulacaoGetAllResponse> ObterTodasAsync(int pagina = 1, int qtdPorPagina = 10);
-        Task<IEnumerable<SimulacaoCreateResponse>> ObterPorDataAsync(DateTime data);
+        Task<SimulacaoByDiaResponse> ObterPorDataAsync(DateTime data);
     }
 }

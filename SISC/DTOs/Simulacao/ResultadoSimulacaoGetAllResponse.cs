@@ -1,6 +1,6 @@
 ﻿namespace SISC.DTOs.Simulacao
 {
-    public class ResultadoSimulacaoResumidoResponse
+    public class ResultadoSimulacaoGetAllResponse
     {
         public long IdSimulacao { get; set; }
         public decimal valorDesejado { get; set; }

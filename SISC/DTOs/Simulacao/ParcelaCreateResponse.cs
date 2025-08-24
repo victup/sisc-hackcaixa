@@ -2,7 +2,7 @@
 
 namespace SISC.DTOs.Responses.Simulacao
 {
-    public class ParcelaResponse
+    public class ParcelaCreateResponse
     {
         public int Numero { get; set; }
         public decimal ValorAmortizacao { get; set; }

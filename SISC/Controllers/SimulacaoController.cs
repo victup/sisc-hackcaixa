@@ -79,11 +79,28 @@ namespace SISC.Controllers
         }
 
         [HttpGet("por-data/{data:datetime}")]
-        [ProducesResponseType(typeof(IEnumerable<SimulacaoCreateResponse>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<SimulacaoCreateResponse>>> PorData(DateTime data)
+        [ProducesResponseType(typeof(SimulacaoByDiaResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<SimulacaoByDiaResponse>> PorData(DateTime data)
         {
-            var sims = await _service.ObterPorDataAsync(data);
-            return Ok(sims);
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            try
+            {
+                var sims = await _service.ObterPorDataAsync(data);
+                stopwatch.Stop();
+
+                _telemetria.Registrar("Simulacao.PorData", stopwatch.ElapsedMilliseconds, true);
+
+                return Ok(sims);
+            }
+            catch
+            {
+                stopwatch.Stop();
+
+                _telemetria.Registrar("Simulacao.PorData", stopwatch.ElapsedMilliseconds, false);
+                throw;
+            }
         }
 
     }
