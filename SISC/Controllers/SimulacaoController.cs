@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SISC.DTOs.Requests.Simulacao;
 using SISC.DTOs.Responses.Simulacao;
+using SISC.DTOs.Simulacao;
 using SISC.Services.Simulacao;
 using SISC.Services.Telemetria;
 
@@ -20,9 +21,9 @@ namespace SISC.Controllers
         }
 
         [HttpPost("simular")]
-        [ProducesResponseType(typeof(SimulacaoResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SimulacaoCreateResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<SimulacaoResponse>> Criar([FromBody] SimulacaoRequest request)
+        public async Task<ActionResult<SimulacaoCreateResponse>> Criar([FromBody] SimulacaoRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -48,16 +49,38 @@ namespace SISC.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<SimulacaoResponse>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<SimulacaoResponse>>> Todas()
+        [ProducesResponseType(typeof(SimulacaoGetAllResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<SimulacaoGetAllResponse>> Todas(
+    [FromQuery] int pagina = 1,
+    [FromQuery] int qtdPorPagina = 10)
         {
-            var sims = await _service.ObterTodasAsync();
-            return Ok(sims);
+            if (pagina <= 0 || qtdPorPagina <= 0)
+                return BadRequest("Os parâmetros de paginação devem ser maiores que zero.");
+
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            try
+            {
+                var sims = await _service.ObterTodasAsync(pagina, qtdPorPagina);
+                stopwatch.Stop();
+
+                _telemetria.Registrar("Simulacao.Todas", stopwatch.ElapsedMilliseconds, true);
+
+                return Ok(sims);
+            }
+            catch
+            {
+                stopwatch.Stop();
+
+                _telemetria.Registrar("Simulacao.Todas", stopwatch.ElapsedMilliseconds, false);
+                throw;
+            }
         }
 
         [HttpGet("por-data/{data:datetime}")]
-        [ProducesResponseType(typeof(IEnumerable<SimulacaoResponse>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<SimulacaoResponse>>> PorData(DateTime data)
+        [ProducesResponseType(typeof(IEnumerable<SimulacaoCreateResponse>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<SimulacaoCreateResponse>>> PorData(DateTime data)
         {
             var sims = await _service.ObterPorDataAsync(data);
             return Ok(sims);

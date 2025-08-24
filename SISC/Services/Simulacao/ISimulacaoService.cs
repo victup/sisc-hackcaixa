@@ -1,12 +1,13 @@
 ﻿using SISC.DTOs.Requests.Simulacao;
 using SISC.DTOs.Responses.Simulacao;
+using SISC.DTOs.Simulacao;
 
 namespace SISC.Services.Simulacao
 {
     public interface ISimulacaoService
     {
-        Task<SimulacaoResponse> CriarSimulacaoAsync(SimulacaoRequest request);
-        Task<IEnumerable<SimulacaoResponse>> ObterTodasAsync();
-        Task<IEnumerable<SimulacaoResponse>> ObterPorDataAsync(DateTime data);
+        Task<SimulacaoCreateResponse> CriarSimulacaoAsync(SimulacaoRequest request);
+        Task<SimulacaoGetAllResponse> ObterTodasAsync(int pagina = 1, int qtdPorPagina = 10);
+        Task<IEnumerable<SimulacaoCreateResponse>> ObterPorDataAsync(DateTime data);
     }
 }

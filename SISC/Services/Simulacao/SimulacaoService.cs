@@ -18,7 +18,7 @@ namespace SISC.Services.Simulacao
             _produtoRepo = produtoRepo;
         }
 
-        public async Task<SimulacaoResponse> CriarSimulacaoAsync(SimulacaoRequest request)
+        public async Task<SimulacaoCreateResponse> CriarSimulacaoAsync(SimulacaoRequest request)
         {
             var produtos = await _produtoRepo.GetAllAsync();
             var produto = produtos.FirstOrDefault(p =>
@@ -58,19 +58,33 @@ namespace SISC.Services.Simulacao
 
             await _simulacaoRepo.AddAsync(simulacao);
 
-            return MapToResponse(simulacao);
+            return MapToResponseCreate(simulacao);
         }
 
-        public async Task<IEnumerable<SimulacaoResponse>> ObterTodasAsync()
+        public async Task<SimulacaoGetAllResponse> ObterTodasAsync(int pagina = 1, int qtdPorPagina = 10)
         {
             var sims = await _simulacaoRepo.GetAllAsync();
-            return sims.Select(MapToResponse);
+
+            var totalRegistros = sims.Count();
+            var registrosPaginados = sims
+                .Skip((pagina - 1) * qtdPorPagina)
+                .Take(qtdPorPagina)
+                .Select(MapToResultadoResumido)
+                .ToList();
+
+            return new SimulacaoGetAllResponse
+            {
+                pagina = pagina,
+                qtdRegistros = totalRegistros,
+                qtdRegistrosPagina = registrosPaginados.Count,
+                registros = registrosPaginados
+            };
         }
 
-        public async Task<IEnumerable<SimulacaoResponse>> ObterPorDataAsync(DateTime data)
+        public async Task<IEnumerable<SimulacaoCreateResponse>> ObterPorDataAsync(DateTime data)
         {
             var sims = await _simulacaoRepo.GetByDateAsync(data);
-            return sims.Select(MapToResponse);
+            return sims.Select(MapToResponseCreate);
         }
 
         // --- MÉTODOS DE CÁLCULO ---
@@ -124,17 +138,14 @@ namespace SISC.Services.Simulacao
             return parcelas;
         }
 
-        private SimulacaoResponse MapToResponse(SISC.Models.Simulacao.Simulacao s)
+        private SimulacaoCreateResponse MapToResponseCreate(SISC.Models.Simulacao.Simulacao s)
         {
-            return new SimulacaoResponse
+            return new SimulacaoCreateResponse
             {
                 IdSimulacao = s.Id,
                 CodigoProduto = s.CodigoProduto,
                 DescricaoProduto = s.DescricaoProduto,
                 TaxaJuros = s.TaxaJuros,
-                ValorDesejado = s.ValorDesejado,
-                Prazo = s.Prazo,
-                DataCriacao = s.DataCriacao,
                 ResultadoSimulacao = s.Resultados.Select(r => new ResultadoSimulacaoResponse
                 {
                     Tipo = r.Tipo,
@@ -146,6 +157,21 @@ namespace SISC.Services.Simulacao
                         ValorPrestacao = p.ValorPrestacao
                     }).ToList()
                 }).ToList()
+            };
+        }
+
+        private ResultadoSimulacaoResumidoResponse MapToResultadoResumido(SISC.Models.Simulacao.Simulacao s)
+        {
+            return new ResultadoSimulacaoResumidoResponse
+            {
+                IdSimulacao = s.Id,
+                CodigoProduto = s.CodigoProduto,
+                DescricaoProduto = s.DescricaoProduto,
+                valorDesejado = s.ValorDesejado,
+                Prazo = s.Prazo,
+                valorTotalParcelas = s.Resultados
+                    .SelectMany(r => r.Parcelas)
+                    .Sum(p => p.ValorPrestacao)
             };
         }
     }
