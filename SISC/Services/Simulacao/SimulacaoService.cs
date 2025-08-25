@@ -1,9 +1,14 @@
-﻿using SISC.DTOs.Requests.Simulacao;
+﻿using System.Text.Json;
+using Azure.Messaging.EventHubs;
+using Azure.Messaging.EventHubs.Producer;
+using Microsoft.Extensions.Options;
+using SISC.DTOs.Requests.Simulacao;
 using SISC.DTOs.Responses.Simulacao;
 using SISC.DTOs.Simulacao;
 using SISC.Models.Simulacao;
 using SISC.Repositories.Produtos;
 using SISC.Repositories.Simulacao;
+using SISC.Settings;
 
 namespace SISC.Services.Simulacao
 {
@@ -11,11 +16,21 @@ namespace SISC.Services.Simulacao
     {
         private readonly ISimulacaoRepository _simulacaoRepo;
         private readonly IProdutoRepository _produtoRepo;
+        private readonly EventHubProducerClient _eventHubProducer;
+        private readonly ILogger<SimulacaoService> _logger;
 
-        public SimulacaoService(ISimulacaoRepository simulacaoRepo, IProdutoRepository produtoRepo)
+        public SimulacaoService(
+            ISimulacaoRepository simulacaoRepo, 
+            IProdutoRepository produtoRepo,
+            IOptions<EventHubSettings> options,
+            ILogger<SimulacaoService> logger)
         {
             _simulacaoRepo = simulacaoRepo;
             _produtoRepo = produtoRepo;
+            _logger = logger;
+
+            var settings = options.Value;
+            _eventHubProducer = new EventHubProducerClient(settings.ConnectionString);
         }
 
         public async Task<SimulacaoCreateResponse> CriarSimulacaoAsync(SimulacaoRequest request)
@@ -57,6 +72,25 @@ namespace SISC.Services.Simulacao
             };
 
             await _simulacaoRepo.AddAsync(simulacao);
+
+            try
+            {
+                var json = JsonSerializer.Serialize(simulacao, new JsonSerializerOptions
+                {
+                    WriteIndented = false,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                using EventDataBatch eventBatch = await _eventHubProducer.CreateBatchAsync();
+                if (!eventBatch.TryAdd(new EventData(System.Text.Encoding.UTF8.GetBytes(json))))
+                    throw new Exception("Envelope muito grande para enviar ao EventHub.");
+
+                await _eventHubProducer.SendAsync(eventBatch);
+            }
+            catch (Exception ex)
+            {
+                 _logger.LogError(ex, "Falha ao enviar simulação {Id} para EventHub", simulacao.Id);
+            }
 
             return MapToResponseCreate(simulacao);
         }

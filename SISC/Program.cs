@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SISC.Data;
 using SISC.Extensions;
+using SISC.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,10 @@ builder.Services.AddDbContext<SimulacoesDbContext>(options =>
         builder.Configuration.GetConnectionString("SimulacoesDb")
     )
 );
+
+builder.Services.Configure<EventHubSettings>(
+    builder.Configuration.GetSection("EventHub"));
+
 
 builder.Services.AddSiscServices();
 
