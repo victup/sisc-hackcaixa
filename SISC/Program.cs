@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SISC.Data;
 using SISC.Extensions;
+using SISC.Mappings;
 using SISC.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,10 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<SISC.Filters.GlobalExceptionFilter>();
 });
 
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<SimulacaoProfile>();
+});
 
 builder.Services.AddSiscServices();
 

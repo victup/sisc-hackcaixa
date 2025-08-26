@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using AutoMapper;
 using Azure.Messaging.EventHubs;
 using Azure.Messaging.EventHubs.Producer;
 using Microsoft.Extensions.Options;
@@ -10,6 +10,7 @@ using SISC.Models.Simulacao;
 using SISC.Repositories.Produtos;
 using SISC.Repositories.Simulacao;
 using SISC.Settings;
+using System.Text.Json;
 
 namespace SISC.Services.Simulacao
 {
@@ -18,16 +19,19 @@ namespace SISC.Services.Simulacao
         private readonly ISimulacaoRepository _simulacaoRepo;
         private readonly IProdutoRepository _produtoRepo;
         private readonly EventHubProducerClient _eventHubProducer;
+        private readonly IMapper _mapper;
         private readonly ILogger<SimulacaoService> _logger;
 
         public SimulacaoService(
             ISimulacaoRepository simulacaoRepo, 
             IProdutoRepository produtoRepo,
             IOptions<EventHubSettings> options,
-            ILogger<SimulacaoService> logger)
+            ILogger<SimulacaoService> logger,
+            IMapper mapper)
         {
             _simulacaoRepo = simulacaoRepo;
             _produtoRepo = produtoRepo;
+            _mapper = mapper;
             _logger = logger;
 
             var settings = options.Value;
@@ -93,7 +97,7 @@ namespace SISC.Services.Simulacao
                  _logger.LogError(ex, "Falha ao enviar simulação {Id} para EventHub", simulacao.Id);
             }
 
-            return MapToResponseCreate(simulacao);
+            return _mapper.Map<SimulacaoCreateResponse>(simulacao);
         }
 
         public async Task<SimulacaoGetAllResponse> ObterTodasAsync(int pagina = 1, int qtdPorPagina = 10)
@@ -101,10 +105,10 @@ namespace SISC.Services.Simulacao
             var sims = await _simulacaoRepo.GetAllAsync();
 
             var totalRegistros = sims.Count();
-            var registrosPaginados = sims
+            var registrosPaginados = sims   
                 .Skip((pagina - 1) * qtdPorPagina)
                 .Take(qtdPorPagina)
-                .Select(MapToResultadoResumido)
+                .Select(s => _mapper.Map<ResultadoSimulacaoGetAllResponse>(s))
                 .ToList();
 
             return new SimulacaoGetAllResponse
@@ -150,9 +154,6 @@ namespace SISC.Services.Simulacao
                 Simulacoes = agrupado
             };
         }
-
-
-        // --- MÉTODOS DE CÁLCULO ---
 
         private List<Parcela> CalcularSac(decimal valor, int prazo, decimal taxa)
         {
@@ -201,41 +202,6 @@ namespace SISC.Services.Simulacao
             }
 
             return parcelas;
-        }
-
-        private SimulacaoCreateResponse MapToResponseCreate(SISC.Models.Simulacao.Simulacao s)
-        {
-            return new SimulacaoCreateResponse
-            {
-                IdSimulacao = s.Id,
-                CodigoProduto = s.CodigoProduto,
-                DescricaoProduto = s.DescricaoProduto,
-                TaxaJuros = s.TaxaJuros,
-                ResultadoSimulacao = s.Resultados.Select(r => new ResultadoSimulacaoCreateResponse
-                {
-                    Tipo = r.Tipo,
-                    Parcelas = r.Parcelas.Select(p => new ParcelaCreateResponse
-                    {
-                        Numero = p.Numero,
-                        ValorAmortizacao = p.ValorAmortizacao,
-                        ValorJuros = p.ValorJuros,
-                        ValorPrestacao = p.ValorPrestacao
-                    }).ToList()
-                }).ToList()
-            };
-        }
-
-        private ResultadoSimulacaoGetAllResponse MapToResultadoResumido(SISC.Models.Simulacao.Simulacao s)
-        {
-            return new ResultadoSimulacaoGetAllResponse
-            {
-                IdSimulacao = s.Id,
-                valorDesejado = s.ValorDesejado,
-                Prazo = s.Prazo,
-                valorTotalParcelas = s.Resultados
-                    .SelectMany(r => r.Parcelas)
-                    .Sum(p => p.ValorPrestacao)
-            };
         }
     }
 
