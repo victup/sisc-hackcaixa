@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SISC.DTOs.Telemetria;
+using SISC.Models.Errors;
 using SISC.Services.Telemetria;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace SISC.Controllers
 {
     [ApiController]
     [Route("api/v1/telemetria")]
+    [Produces("application/json")]
     public class TelemetriaController : ControllerBase
     {
         private readonly ITelemetriaService _telemetria;
@@ -15,8 +18,19 @@ namespace SISC.Controllers
             _telemetria = telemetria;
         }
 
+        /// <summary>
+        /// Obtém o resumo de eventos de telemetria registrados no sistema.
+        /// </summary>
+        /// <returns>Resumo com estatísticas e métricas da telemetria</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(TelemetriaResponse), StatusCodes.Status200OK)]
+        [SwaggerOperation(
+            Summary = "Obter telemetria",
+            Description = "Retorna um resumo com estatísticas e métricas de telemetria registradas no sistema."
+        )]
+        [SwaggerResponse(StatusCodes.Status200OK, "Resumo de telemetria retornado com sucesso", typeof(TelemetriaResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Requisição inválida", typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Nenhum dado de telemetria encontrado", typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Erro inesperado no servidor", typeof(ErrorResponse))]
         public ActionResult<TelemetriaResponse> Obter()
         {
             var resumo = _telemetria.ObterEventos();

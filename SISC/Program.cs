@@ -25,6 +25,11 @@ builder.Services.AddDbContext<SimulacoesDbContext>(options =>
 builder.Services.Configure<EventHubSettings>(
     builder.Configuration.GetSection("EventHub"));
 
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<SISC.Filters.GlobalExceptionFilter>();
+});
+
 
 builder.Services.AddSiscServices();
 

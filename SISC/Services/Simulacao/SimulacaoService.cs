@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using SISC.DTOs.Requests.Simulacao;
 using SISC.DTOs.Responses.Simulacao;
 using SISC.DTOs.Simulacao;
+using SISC.Exceptions;
 using SISC.Models.Simulacao;
 using SISC.Repositories.Produtos;
 using SISC.Repositories.Simulacao;
@@ -43,7 +44,7 @@ namespace SISC.Services.Simulacao
                 request.Prazo <= p.NuMaximoMeses);
 
             if (produto == null)
-                throw new ArgumentException("Nenhum produto atende os parâmetros da simulação.");
+                throw new NegocioException("Nenhum produto atende os parâmetros da simulação.");
 
             var resultadoSac = CalcularSac(request.ValorDesejado, request.Prazo, produto.PcTaxaJuros);
             var resultadoPrice = CalcularPrice(request.ValorDesejado, request.Prazo, produto.PcTaxaJuros);
@@ -83,7 +84,7 @@ namespace SISC.Services.Simulacao
 
                 using EventDataBatch eventBatch = await _eventHubProducer.CreateBatchAsync();
                 if (!eventBatch.TryAdd(new EventData(System.Text.Encoding.UTF8.GetBytes(json))))
-                    throw new Exception("Envelope muito grande para enviar ao EventHub.");
+                    throw new NegocioException("Envelope muito grande para enviar ao EventHub.");
 
                 await _eventHubProducer.SendAsync(eventBatch);
             }
