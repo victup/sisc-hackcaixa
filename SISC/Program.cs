@@ -36,7 +36,7 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<SimulacaoProfile>();
 });
 
-builder.Services.AddSiscServices();
+builder.Services.AddSiscServices(builder.Configuration);
 
 var app = builder.Build();
 
