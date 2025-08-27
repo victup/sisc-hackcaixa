@@ -3,7 +3,8 @@
 ## Sobre o SISC
 
 O SISC (Sistema de Simulação de Crédito Caixa) é uma API desenvolvida para gerenciar simulações de produtos financeiros, com foco em organização, clareza e boas práticas de arquitetura.
-O projeto foi construído seguindo princípios de SOLID, Clean Code e com documentação detalhada via Swagger e README estruturado, garantindo fácil manutenção e entendimento.
+O projeto foi construído seguindo princípios de SOLID, Clean Code e com documentação detalhada via Swagger e README estruturado, garantindo fácil manutenção e entendimetno.
+
 
 Além das funcionalidades básicas de criação, listagem e consulta de simulações, o sistema traz alguns diferenciais importantes:
 
