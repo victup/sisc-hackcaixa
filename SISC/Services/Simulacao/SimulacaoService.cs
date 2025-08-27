@@ -84,7 +84,7 @@ namespace SISC.Services.Simulacao
                 TaxaJuros = produto.PcTaxaJuros,
                 ValorDesejado = request.ValorDesejado,
                 Prazo = request.Prazo,
-                DataCriacao = DateTime.UtcNow,
+                DataCriacao = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time")),
                 Resultados = new List<ResultadoSimulacao>
         {
             new ResultadoSimulacao { Tipo = "SAC", Parcelas = resultadoSac },
