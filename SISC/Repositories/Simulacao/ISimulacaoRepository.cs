@@ -2,8 +2,8 @@
 {
     public interface ISimulacaoRepository
     {
-        Task AddAsync(SISC.Models.Simulacao.Simulacao simulacao);
-        Task<IEnumerable<SISC.Models.Simulacao.Simulacao>> GetAllAsync();
-        Task<IEnumerable<SISC.Models.Simulacao.Simulacao>> GetByDateAsync(DateTime date);
+        Task AddAsync(Models.Simulacao.Simulacao simulacao);
+        Task<IEnumerable<Models.Simulacao.Simulacao>> GetAllAsync();
+        Task<IEnumerable<Models.Simulacao.Simulacao>> GetByDateAsync(DateTime date);
     }
 }

@@ -21,11 +21,7 @@ public class TelemetriaService : ITelemetriaService
 
         lock (stats)
         {
-            stats.TotalRequisicoes++;
-            stats.TempoTotal += tempoMs;
-            stats.TempoMinimo = Math.Min(stats.TempoMinimo, tempoMs);
-            stats.TempoMaximo = Math.Max(stats.TempoMaximo, tempoMs);
-            if (sucesso) stats.Sucessos++;
+            AtualizarEstatisticas(stats, tempoMs, sucesso);
         }
     }
 
@@ -34,19 +30,53 @@ public class TelemetriaService : ITelemetriaService
         return new TelemetriaResponse
         {
             DataReferencia = DateTime.UtcNow.Date,
-            ListaEndpoints = _estatisticas.Select(kvp =>
-            {
-                var s = kvp.Value;
-                return new EndpointTelemetriaResponse
-                {
-                    NomeApi = kvp.Key,
-                    QtdRequisicoes = s.TotalRequisicoes,
-                    TempoMedio = s.TotalRequisicoes > 0 ? s.TempoTotal / s.TotalRequisicoes : 0,
-                    TempoMinimo = s.TempoMinimo == long.MaxValue ? 0 : s.TempoMinimo,
-                    TempoMaximo = s.TempoMaximo == long.MinValue ? 0 : s.TempoMaximo,
-                    PercentualSucesso = s.TotalRequisicoes > 0 ? (double)s.Sucessos / s.TotalRequisicoes : 0
-                };
-            }).ToList()
+            ListaEndpoints = MapearEndpoints()
         };
+    }
+
+    private void AtualizarEstatisticas(Stats stats, long tempoMs, bool sucesso)
+    {
+        stats.TotalRequisicoes++;
+        stats.TempoTotal += tempoMs;
+        stats.TempoMinimo = Math.Min(stats.TempoMinimo, tempoMs);
+        stats.TempoMaximo = Math.Max(stats.TempoMaximo, tempoMs);
+        if (sucesso)
+        {
+            stats.Sucessos++;
+        }
+    }
+
+    private List<EndpointTelemetriaResponse> MapearEndpoints()
+    {
+        return _estatisticas
+            .Select(kvp => CriarEndpointResponse(kvp.Key, kvp.Value))
+            .ToList();
+    }
+
+    private EndpointTelemetriaResponse CriarEndpointResponse(string nomeApi, Stats stats)
+    {
+        return new EndpointTelemetriaResponse
+        {
+            NomeApi = nomeApi,
+            QtdRequisicoes = stats.TotalRequisicoes,
+            TempoMedio = CalcularTempoMedio(stats),
+            TempoMinimo = stats.TempoMinimo == long.MaxValue ? 0 : stats.TempoMinimo,
+            TempoMaximo = stats.TempoMaximo == long.MinValue ? 0 : stats.TempoMaximo,
+            PercentualSucesso = CalcularPercentualSucesso(stats)
+        };
+    }
+
+    private long CalcularTempoMedio(Stats stats)
+    {
+        return stats.TotalRequisicoes > 0
+            ? stats.TempoTotal / stats.TotalRequisicoes
+            : 0;
+    }
+
+    private double CalcularPercentualSucesso(Stats stats)
+    {
+        return stats.TotalRequisicoes > 0
+            ? (double)stats.Sucessos / stats.TotalRequisicoes
+            : 0;
     }
 }
