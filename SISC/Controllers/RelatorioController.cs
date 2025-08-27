@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SISC.DTOs.Relatorio;
+using SISC.Models.Enums;
 using SISC.Models.Errors;
 using SISC.Services.Relatorio;
+using SISC.Services.Telemetria;
+using SISC.Utils;
 
 namespace SISC.Controllers
 {
@@ -10,10 +13,12 @@ namespace SISC.Controllers
     public class RelatorioController : ControllerBase
     {
         private readonly IRelatorioService _relatorioService;
+        private readonly ITelemetriaService _telemetria;
 
-        public RelatorioController(IRelatorioService relatorioService)
+        public RelatorioController(IRelatorioService relatorioService, ITelemetriaService telemetria)
         {
             _relatorioService = relatorioService;
+            _telemetria = telemetria;
         }
 
         /// <summary>
@@ -26,8 +31,21 @@ namespace SISC.Controllers
         [ProducesResponseType(typeof(ErrorResponse), 500)]
         public async Task<ActionResult<RelatorioResponse>> Get()
         {
-            var relatorio = await _relatorioService.GerarRelatorioAsync();
-            return Ok(relatorio);
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                var relatorio = await _relatorioService.GerarRelatorioAsync();
+                _telemetria.Registrar(FuncionalidadeEnum.RL_001_REL_IA.GetDescription(), stopwatch.ElapsedMilliseconds, true);
+                return Ok(relatorio);
+            }
+            catch
+            {
+                stopwatch.Stop();
+                _telemetria.Registrar(FuncionalidadeEnum.RL_001_REL_IA.GetDescription(), stopwatch.ElapsedMilliseconds, false);
+
+                throw;
+            }
+            
         }
     }
 }

@@ -2,9 +2,11 @@
 using SISC.DTOs.Requests.Simulacao;
 using SISC.DTOs.Responses.Simulacao;
 using SISC.DTOs.Simulacao;
+using SISC.Models.Enums;
 using SISC.Models.Errors;
 using SISC.Services.Simulacao;
 using SISC.Services.Telemetria;
+using SISC.Utils;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace SISC.Controllers
@@ -47,14 +49,14 @@ namespace SISC.Controllers
                 var simulacao = await _service.CriarSimulacaoAsync(request);
 
                 stopwatch.Stop();
-                _telemetria.Registrar("Simulacao.Criar", stopwatch.ElapsedMilliseconds, true);
+                _telemetria.Registrar(FuncionalidadeEnum.SM_001_SIMULAR.GetDescription(), stopwatch.ElapsedMilliseconds, true);
 
                 return Ok(simulacao);
             }
             catch
             {
                 stopwatch.Stop();
-                _telemetria.Registrar("Simulacao.Criar", stopwatch.ElapsedMilliseconds, false);
+                _telemetria.Registrar(FuncionalidadeEnum.SM_001_SIMULAR.GetDescription(), stopwatch.ElapsedMilliseconds, false);
 
                 throw;
             }
@@ -85,7 +87,7 @@ namespace SISC.Controllers
                 var sims = await _service.ObterTodasAsync(pagina, qtdPorPagina);
                 stopwatch.Stop();
 
-                _telemetria.Registrar("Simulacao.Todas", stopwatch.ElapsedMilliseconds, true);
+                _telemetria.Registrar(FuncionalidadeEnum.SM_002_SIMULACOES.GetDescription(), stopwatch.ElapsedMilliseconds, true);
 
                 return Ok(sims);
             }
@@ -93,7 +95,7 @@ namespace SISC.Controllers
             {
                 stopwatch.Stop();
 
-                _telemetria.Registrar("Simulacao.Todas", stopwatch.ElapsedMilliseconds, false);
+                _telemetria.Registrar(FuncionalidadeEnum.SM_002_SIMULACOES.GetDescription(), stopwatch.ElapsedMilliseconds, false);
                 throw;
             }
         }
@@ -119,7 +121,7 @@ namespace SISC.Controllers
                 var sims = await _service.ObterPorDataAsync(data);
                 stopwatch.Stop();
 
-                _telemetria.Registrar("Simulacao.PorData", stopwatch.ElapsedMilliseconds, true);
+                _telemetria.Registrar(FuncionalidadeEnum.SM_003_SIMULACOES_DATA.GetDescription(), stopwatch.ElapsedMilliseconds, true);
 
                 return Ok(sims);
             }
@@ -127,7 +129,7 @@ namespace SISC.Controllers
             {
                 stopwatch.Stop();
 
-                _telemetria.Registrar("Simulacao.PorData", stopwatch.ElapsedMilliseconds, false);
+                _telemetria.Registrar(FuncionalidadeEnum.SM_003_SIMULACOES_DATA.GetDescription(), stopwatch.ElapsedMilliseconds, false);
                 throw;
             }
         }
